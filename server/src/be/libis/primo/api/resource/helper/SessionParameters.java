@@ -9,11 +9,15 @@ import com.exlibris.primo.context.ContextAccess;
 import com.exlibris.primo.domain.delivery.Institution;
 import com.exlibris.primo.domain.delivery.InstitutionIP;
 import com.exlibris.primo.domain.reference.HMappingTables;
+import com.exlibris.primo.domain.views.Views;
 import com.exlibris.primo.facade.CodeTablesManagementFacade;
 import com.exlibris.primo.facade.InstitutionsManagementFacade;
 import com.exlibris.primo.pds.PdsUserInfo;
+import com.exlibris.primo.server.facade.ViewsManagementFacade;
 import com.exlibris.primo.utils.SessionUtils;
+import com.exlibris.primo.xsd.primoview.config.ViewDocument.View;
 import java.net.InetAddress;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -33,6 +37,8 @@ public class SessionParameters {
     private String institutionCode;
     private String institutionNameByIP;
     private String institutionCodeByIP;
+    private String institutionNameByView;
+    private String institutionCodeByView;    
     private PdsUserInfo userInfo;
     private String pdsUrl;
     private String interfaceLanguage;
@@ -63,11 +69,22 @@ public class SessionParameters {
             this.metalibInstitutionCode = metalibInstitutes.get(0).getSourceCode1();
         }
 
-
+        ViewsManagementFacade views = (ViewsManagementFacade) ContextAccess.getInstance().getBean("ViewsManagementFacade");
+        try {
+            List<Views> viewsList = views.findViewByViewCode(this.view);
+            Views vv =viewsList.get(0);
+        
+            Institution i  = vv.getInstitutions();
+            this.institutionCodeByView = i.getInstitutionCode();
+            this.institutionNameByView = i.getInstitutionName();                        
+        } catch (Exception ex) {
+            Logger.getLogger(SessionResource.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
         InstitutionsManagementFacade institutions = (InstitutionsManagementFacade) ContextAccess.getInstance().getBean("institutionsManagementFacade");
         try {
             InetAddress ipAddress = InetAddress.getByName(request.getRemoteAddr());
-            InstitutionIP institutionByIP = institutions.findInstitution(ipAddress);
+            InstitutionIP institutionByIP = institutions.findInstitution(ipAddress);            
 
             Institution i = institutionByIP.getInstitution();
             
