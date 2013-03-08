@@ -1,6 +1,6 @@
 Installing brief
 ================
-* copy lib/gson-x.x.x.jar and lib/jersey-bundle-x.x.jar into the WEB-INF/lib directory on the server
+* copy lib/gson-x.x.x.jar and lib/jersey-bundle-x.x.jar into the WEB-INF/lib directory to the frontend servers
 * copy bin/PrimoRestAPI.jar into the WEB-INF/lib directory on the server
 * register a '/rest' endpoint in the WEB-INF/web.xml file
 * restart FE and you are done
@@ -17,7 +17,7 @@ mv xmlbeans-qname.jar xmlbeans-qname.jar.conflict
 mv jaxrpc.jar jaxrpc.jar.conflict
 ```
 
-* copying libraries into place
+* copying libraries onto the frontend servers
 ```
 scp ./bin/PrimoRestAPI.jar ./lib/*.jar primo@your_primo_server:/tmp
 ssh primo@your_primo_server
