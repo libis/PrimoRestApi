@@ -1,6 +1,6 @@
 
 PRIMO 4.0 cleanup conflicts
-`
+	
 	cd /exlibris/primo/p4_1/ng/primo/home/system/thirdparty/jbossas/server/search/deploy/jaguar-web.ear/lib
 	mv xmlbeans-qname.jar xmlbeans-qname.jar.conflict
 	mv jaxrpc.jar jaxrpc.jar.conflict
@@ -8,13 +8,13 @@ PRIMO 4.0 cleanup conflicts
 	cd /exlibris/primo/p4_1/ng/primo/home/system/thirdparty/jbossas/server/search/lib
 	mv xmlbeans-qname.jar xmlbeans-qname.jar.conflict
 	mv jaxrpc.jar jaxrpc.jar.conflict
-`
+
 
 *** 
 
-Patch web.xml to listen for requests on /rest
+<p>Patch web.xml to listen for requests on /rest</p>
 /exlibris/primo/p4_1/ng/primo/home/system/thirdparty/jbossas/server/search/deploy/primo_library-app.ear/primo_library-libweb.war/WEB-INF/web.xml
-`
+	
 	<code>
 		<servlet>
         		<servlet-name>PrimoRestApi</servlet-name>
@@ -25,10 +25,10 @@ Patch web.xml to listen for requests on /rest
         		</init-param>
         		<load-on-startup>1</load-on-startup>
     		</servlet>
-
+		 
 		<servlet-mapping>
 			<servlet-name>PrimoRestApi</servlet-name>
 			<url-pattern>/rest/*</url-pattern>
 		</servlet-mapping>
 	</code>
-`
+
