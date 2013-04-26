@@ -114,6 +114,7 @@ public class RecordResource {
             if (recordIDEncoding != null && recordIDEncoding.equals("b64")){
                 recordID = Base64.base64Decode(recordID);                
             }
+                                       
                                                 
             RecordDocDTO binaryRecord = new RecordResourceHelper().getRecordDocDTO(recordID, request);
 
@@ -129,6 +130,31 @@ public class RecordResource {
             return Response.serverError().type(MediaType.TEXT_PLAIN_TYPE).entity("Error fetching record:" + e.getMessage()).build();
         }
     }
+
+    @Path("ris.txt/{id}")
+    @GET
+    @Produces("text/plain")
+    public String getRecordRisTxt(@PathParam("id") String recordID, @QueryParam("encode") String recordIDEncoding) throws IOException {
+        try {
+            if (recordIDEncoding != null && recordIDEncoding.equals("b64")){
+                recordID = Base64.base64Decode(recordID);                
+            }
+                                                                                       
+            RecordDocDTO binaryRecord = new RecordResourceHelper().getRecordDocDTO(recordID, request);
+
+            if (binaryRecord == null) {
+                throw new Exception("Not found");
+            }
+            Date now = new Date();
+            SimpleDateFormat df = new SimpleDateFormat("yyyMMddhhmmss");
+
+            return Ris2.fromRecordDocDTO(binaryRecord);            
+        } catch (Exception e) {
+            Logger.getLogger(RecordResource.class.getName()).log(Level.INFO, null, e);
+            return "<error><message>Error fetching record</message><reason>" + e.getMessage() + "</reason></error>";            
+        }
+    }    
+    
     
     @Path("deeplink/{id}")
     @GET

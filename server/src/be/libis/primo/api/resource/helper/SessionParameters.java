@@ -69,7 +69,7 @@ public class SessionParameters {
             this.metalibInstitutionCode = metalibInstitutes.get(0).getSourceCode1();
         }
 
-        ViewsManagementFacade views = (ViewsManagementFacade) ContextAccess.getInstance().getBean("ViewsManagementFacade");
+        ViewsManagementFacade views = (ViewsManagementFacade) ContextAccess.getInstance().getBean("viewsManagementFacade");
         try {
             List<Views> viewsList = views.findViewByViewCode(this.view);
             Views vv =viewsList.get(0);
@@ -88,7 +88,7 @@ public class SessionParameters {
 
             Institution i = institutionByIP.getInstitution();
             
-            if (institution != null){
+            if (i != null){
                 this.institutionCodeByIP = i.getInstitutionCode();
                 this.institutionNameByIP = i.getInstitutionName();
             }
@@ -146,5 +146,19 @@ public class SessionParameters {
      */
     public String getInstitutionCodeByIP() {
         return institutionCodeByIP;
+    }
+
+    /**
+     * @return the institutionNameByView
+     */
+    public String getInstitutionNameByView() {
+        return institutionNameByView;
+    }
+
+    /**
+     * @return the institutionCodeByView
+     */
+    public String getInstitutionCodeByView() {
+        return institutionCodeByView;
     }
 }

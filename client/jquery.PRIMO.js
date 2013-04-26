@@ -344,6 +344,13 @@
                     return sessionData.institutionNameByIP;
                 }()),
                 /**
+                 * @property nameByVIEW
+                 * @type String
+                 */
+                nameByVIEW:(function () {
+                    return sessionData.institutionNameByView;
+                }()),
+                /**
                  * @property code
                  * @type String
                  */
@@ -356,6 +363,13 @@
                  */
                 codeByIP:(function () {
                     return sessionData.institutionCodeByIP;
+                }()),
+                /**
+                 * @property codeByVIEW
+                 * @type String
+                 */
+                codeByVIEW:(function () {
+                    return sessionData.institutionCodeByView;
                 }())
             },
             /**
