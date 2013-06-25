@@ -36,7 +36,7 @@ import javax.ws.rs.core.UriInfo;
  * 
  * add
  * <mapping resource="com/exlibris/primo/domain/entities/OriginalSourceRecord.hbm.xml"/>
- * to /exlibris/primo/p3_1/ng/primo/home/system/search/conf/hibernate.cfg.xml
+ * to /exlibris/primo/p4_1/ng/primo/home/system/search/conf/hibernate.cfg.xml
  * 
  */
 //jQuery.getJSON('/primo_library/libweb/rest/records', function(data){jQuery.each(data, function(){console.log(this.id);})});
@@ -162,9 +162,22 @@ public class RecordResource {
     public Response getRecordDeeplink(@PathParam("id") String recordID) {
         try {
             return Response.ok(SessionUtils.getDeepLinkForPNX(request, recordID)).build();
-        } catch (Exception e) {
+        } catch (Exception e) {            
             Logger.getLogger(RecordResource.class.getName()).log(Level.INFO, null, e);
             return Response.serverError().type(MediaType.TEXT_PLAIN_TYPE).entity("Error fetching DeepLink:" + e.getMessage()).build();            
+        }
+    }
+    
+    @Path("dedupid2recordids/{id}")
+    @GET
+    @Produces("application/json")
+    public String getDeduppedRecordIds(@PathParam("id") String recordID){
+        try {
+             Gson gson = new Gson();
+             return gson.toJson(new RecordResourceHelper().getRecordIDSFromDedupID(recordID));
+        } catch(Exception e) {
+            Logger.getLogger(RecordResource.class.getName()).log(Level.INFO, null, e);
+            return "<error><message>Error fetching id's</message><reason>" + e.getMessage() + "</reason></error>";               
         }
     }
 }

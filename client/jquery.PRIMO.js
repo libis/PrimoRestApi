@@ -79,9 +79,33 @@
         }
         ;
         return remoteRecord;
+    };
+
+    function _getIsDedupRecord(id){
+	return id.search(/^dedupmrg/) != -1;
     }
 
-    ;
+
+    function _lookupRecordIDsWithDedupID(id) {
+        var remoteRecord = '';
+
+	jQuery.ajax({
+	   async:false,
+	   type:'get',
+           dataType:'json',
+	   url:'/primo_library/libweb/rest/records/dedupid2recordids/' + id,
+           success:function (data) {
+            remoteRecord = data;
+           },
+           error:function (xhr, status, errorThrown) {
+	     if (errorThrown === 'Not Found') {
+	       alert('Unable to load data. You need the PRIMO restfull API for this to work');
+             }
+           }
+        });
+
+	return remoteRecord;
+    }
 
     /**
      * Private method to retrieve the material type of a record.
@@ -261,9 +285,7 @@
         record.id = record.find('.EXLResultRecordId[name]').attr('name');
         record.title = record.find('.EXLResultTitle').text().trim();
         record.openUrl = record.find('.EXLMoreTab a').attr('href');
-        record.isRemoteRecord = function () {
-            return (record.id.substring(0, 2) === 'TN')
-        };
+        record.isRemoteRecord = (record.id.substring(0, 2) === 'TN');
         record.getPNX = function () {
             return _getRemoteRecord('pnx', 'text', record.id);
         };
@@ -282,6 +304,15 @@
         record.getTabByName = function (name) {
             return _tab(record, name);
         };
+
+	record.isDedupRecord = _getIsDedupRecord(record.id);
+
+        record.lookupRecordIDsWithDedupID = function () {
+		if (_getIsDedupRecord(record.id)) {
+			return _lookupRecordIDsWithDedupID(record.id);		   
+		}
+		return [];
+	};
 
 
         return record;
@@ -323,6 +354,15 @@
             currentViewLanguage:(function () {
                 return sessionData.interfaceLanguage;
             }()),
+	    /**
+	     * Current View PDS url
+             *
+	     * @property currentViewPDSUrl
+	     * @type String
+            */
+	    currentViewPDSUrl:(function() {
+		return sessionData.pdsUrl;
+	    }()), 
             /**
              * Institution data
              * @property institution

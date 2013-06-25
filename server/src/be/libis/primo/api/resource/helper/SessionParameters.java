@@ -56,8 +56,8 @@ public class SessionParameters {
         this.userInfo = SessionUtils.getUserInfo(request);
         this.pdsUrl = SessionUtils.getPDSUrl(request);
         this.interfaceLanguage = SessionUtils.getChosenInterfaceLanguage(request);
-        this.institution = SessionUtils.getInstitution(request);
-
+        this.institution = SessionUtils.getInstitution(request);      
+        
         CodeTablesManagementFacade ctmf = (CodeTablesManagementFacade) ContextAccess.getInstance().getCodeTablesManagementFacade();
         List<HMappingTables> sfxInstitutes = ctmf.findMappingsByTableNameAndTargetEnabled("SFX Institutes", this.institutionCode);
         if (sfxInstitutes.size() > 0) {
@@ -95,10 +95,32 @@ public class SessionParameters {
 
         } catch (Exception ex) {
             Logger.getLogger(SessionResource.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
+        }               
     }
 
+    /**
+     * @return the Mapping table
+     */
+    public List<HMappingTables> getMappingTable(String name, String institutionCode) {
+        
+ //       if (institutionCode == null) {
+ //           institutionCode = this.institutionCode;
+ //       }
+        
+        List<HMappingTables> mapping;
+        CodeTablesManagementFacade ctmf = (CodeTablesManagementFacade) ContextAccess.getInstance().getCodeTablesManagementFacade();
+        if (institutionCode == null) {
+            mapping = ctmf.findMappingTableByName(name, true);
+        } else {
+            mapping = ctmf.findMappingsByTableNameAndTargetEnabled(name, institutionCode);
+        }
+        
+        if (mapping == null) {
+            return new ArrayList();
+        }
+        return mapping;
+    }
+                   
     /**
      * @return the loggedOn
      */
@@ -160,5 +182,12 @@ public class SessionParameters {
      */
     public String getInstitutionCodeByView() {
         return institutionCodeByView;
+    }
+
+    /**
+     * @return the interfaceLanguage
+     */
+    public String getInterfaceLanguage() {        
+        return interfaceLanguage;
     }
 }
