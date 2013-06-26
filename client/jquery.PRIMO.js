@@ -1,5 +1,8 @@
 /**
- * A PRIMO convenience library
+ * @overview A PRIMO convenience library
+ * @licence MIT
+ * @copyright KULeuven/LIBIS 2013
+ * @author Mehmet Celik <mehmet.celik@libis.kuleuven.be>
  * dependencies: PRIMO RestFull API
  * dependencies: jquery.base64
  */
@@ -19,18 +22,18 @@
 
         (function () {
             jQuery.ajax({
-                async:false,
-                type:'get',
-                dataType:'json',
-                url:'/primo_library/libweb/rest/session',
-                success:function (data) {
+                async: false,
+                type: 'get',
+                dataType: 'json',
+                url: '/primo_library/libweb/rest/session',
+                success: function (data) {
                     _sessionData = data;
                 },
-                complete:function (xhr, status) {
+                complete: function (xhr, status) {
                     var http_headers = xhr.getAllResponseHeaders();
                     limoFrontEndId = xhr.getResponseHeader('X-LIMO-FE-ENVIRONMENT');
                 },
-                error:function (xhr, status, errorThrown) {
+                error: function (xhr, status, errorThrown) {
                     if (errorThrown === 'Not Found') {
                         alert('Unable to load session data. You need the PRIMO restfull API for this to work');
                     }
@@ -44,10 +47,11 @@
     /**
      * Private method to load the PNX or orginal XML record from the search engine
      * @method _getRemoteRecord
-     * @param [type] type of record to return must be one of xml,ris,pnx
-     * @param [format] type of data that gets returned must be one of text, xml
-     * @param [id] record id
-     * @return [Object] remote record
+     * @private
+     * @param {String} type type of record to return must be one of xml, pnx, ris, deeplink
+     * @param {String} format type of data that gets returned must be one of text, xml
+     * @param {String} id record id
+     * @returns {Object} remote record
      */
     function _getRemoteRecord(type, format, id) {
         var remoteRecord = '';
@@ -60,14 +64,14 @@
             }
 
             jQuery.ajax({
-                async:false,
-                type:'get',
-                dataType:format,
-                url:'/primo_library/libweb/rest/records/' + type + '/' + id,
-                success:function (data) {
+                async: false,
+                type: 'get',
+                dataType: format,
+                url: '/primo_library/libweb/rest/records/' + type + '/' + id,
+                success: function (data) {
                     remoteRecord = data;
                 },
-                error:function (xhr, status, errorThrown) {
+                error: function (xhr, status, errorThrown) {
                     if (errorThrown === 'Not Found') {
                         alert('Unable to load record data. You need the PRIMO restfull API for this to work');
                     }
@@ -81,37 +85,53 @@
         return remoteRecord;
     };
 
-    function _getIsDedupRecord(id){
-	return id.search(/^dedupmrg/) != -1;
+
+    /**
+     * Private method check if record is a deduped record
+     * @private
+     * @method _getIsDedupRecord
+     * @param {String} id record id
+     * @returns {Boolean} true/false
+     */
+    function _getIsDedupRecord(id) {
+        return id.search(/^dedupmrg/) != -1;
     }
 
 
+    /**
+     * Retrieves the record id's from a deduped record
+     * @method _lookupRecordIDsWithDedupID
+     * @private
+     * @param {String} id record id
+     * @returns {Array} list of record id's
+     */
     function _lookupRecordIDsWithDedupID(id) {
         var remoteRecord = '';
 
-	jQuery.ajax({
-	   async:false,
-	   type:'get',
-           dataType:'json',
-	   url:'/primo_library/libweb/rest/records/dedupid2recordids/' + id,
-           success:function (data) {
-            remoteRecord = data;
-           },
-           error:function (xhr, status, errorThrown) {
-	     if (errorThrown === 'Not Found') {
-	       alert('Unable to load data. You need the PRIMO restfull API for this to work');
-             }
-           }
+        jQuery.ajax({
+            async: false,
+            type: 'get',
+            dataType: 'json',
+            url: '/primo_library/libweb/rest/records/dedupid2recordids/' + id,
+            success: function (data) {
+                remoteRecord = data;
+            },
+            error: function (xhr, status, errorThrown) {
+                if (errorThrown === 'Not Found') {
+                    alert('Unable to load data. You need the PRIMO restfull API for this to work');
+                }
+            }
         });
 
-	return remoteRecord;
+        return remoteRecord;
     }
 
     /**
      * Private method to retrieve the material type of a record.
      * @method _materialType
-     * @param [object] the record object
-     * @return [string] the material type
+     * @private
+     * @param {Object} record the record object
+     * @returns {String} the material type
      */
     function _materialType(record) {
         var materialType = '';
@@ -127,7 +147,14 @@
 
     ;
 
-    //a = jQuery.getScript('http://127.0.0.1/~mehmetc/jquery.PRIMO.js')
+    /**
+     * Private method to get information on a single tab
+     * @method _tabs
+     * @private
+     * @param {String} record record id
+     * @param {Number} i tab id
+     * @returns {Object} Object tab object
+     */
     function _tab(record, i) {
         var tab = null;
 
@@ -164,9 +191,9 @@
             };
             tab.open = function (content, options) {
                 defaults = {
-                    reload:false,
-                    headerContent:'',
-                    url:'#'
+                    reload: false,
+                    headerContent: '',
+                    url: '#'
                 };
                 var o = jQuery.extend(defaults, options);
                 currentTab = record.getTabByName(tabName);
@@ -187,10 +214,16 @@
         }
 
         return tab;
-    }
+    };
 
-    ;
 
+    /**
+     * Private method to get information on all tabs
+     * @method _tabs
+     * @private
+     * @params {String} record record id
+     * @returns {Object} tab data
+     */
     function _tabs(record) {
         var tabData = [];
         var tab_count = record.find('.EXLResultTab').length;
@@ -228,15 +261,32 @@
         return tabData;
     }
 
+    /**
+     * Adds a new tab to tabs
+     * @method _addTab
+     * @private
+     * @param {String} tabName name of tab
+     * @param {Hash} [options] a hash with any of these {record, state:'enabled/disabled', css, url:'#', tooltip, headerContent, click:callbackFunction}
+     * @example
+     * jQuery.PRIMO.records[0].tabs.add('my Tab',
+     {state:'enabled', click:function(event, tab, record, options){
+                                 if (tab.isOpen()){
+                                     tab.close();
+                                 } else {
+                                     tab.open('Hello from tab, {reload:true});
+                                 }
+                             }
+     });
+     */
     function _addTab(tabName, options) {
         defaults = {
-            record:null,
-            state:'disabled',
-            css:tabName.replace(' ', '').toLowerCase() + 'Tab',
-            url:'#',
-            tooltip:'',
-            headerContent:'',
-            click:function (e) {
+            record: null,
+            state: 'disabled',
+            css: tabName.replace(' ', '').toLowerCase() + 'Tab',
+            url: '#',
+            tooltip: '',
+            headerContent: '',
+            click: function (e) {
                 alert('To be implemented...');
             }
         }
@@ -276,8 +326,9 @@
     /**
      * Private method to build a pointer to the record and enhance it
      * @method _record
-     * @param [Number] i record on page
-     * @return [Object] enhanced record pointer
+     * @private
+     * @param {Number} i record on page
+     * @returns {Object} enhanced record pointer
      */
     function _record(i) {
         var record = jQuery(jQuery('.EXLResult')[i]);
@@ -305,14 +356,14 @@
             return _tab(record, name);
         };
 
-	record.isDedupRecord = _getIsDedupRecord(record.id);
+        record.isDedupRecord = _getIsDedupRecord(record.id);
 
         record.lookupRecordIDsWithDedupID = function () {
-		if (_getIsDedupRecord(record.id)) {
-			return _lookupRecordIDsWithDedupID(record.id);		   
-		}
-		return [];
-	};
+            if (_getIsDedupRecord(record.id)) {
+                return _lookupRecordIDsWithDedupID(record.id);
+            }
+            return [];
+        };
 
 
         return record;
@@ -323,170 +374,147 @@
      */
     jQuery.PRIMO = {
         /**
-         * @property session
-         * @type Object
+         * @namespace
+         * @property {object} session
          */
-        session:{
+        session: {
             /**
-             * Contains FrontEnd Identifier
-             *
-             * @property frontEndId
-             * @type String
+             * @property {string} frontEndId Contains FrontEnd Identifier
              */
-            frontEndId:(function () {
+            frontEndId: (function () {
                 return limoFrontEndId
             }()),
             /**
-             * Current View Name
-             *
-             * @property currentViewName
-             * @type String
+             * @property {string} currentViewName Current View Name
              */
-            currentViewName:(function () {
+            currentViewName: (function () {
                 return sessionData.view;
             }()),
             /**
-             * Current View Language
-             *
-             * @property currentViewLanguage
-             * @type String
+             * @property {string} currentViewLanguage Current View Language
              */
-            currentViewLanguage:(function () {
+            currentViewLanguage: (function () {
                 return sessionData.interfaceLanguage;
             }()),
-	    /**
-	     * Current View PDS url
-             *
-	     * @property currentViewPDSUrl
-	     * @type String
-            */
-	    currentViewPDSUrl:(function() {
-		return sessionData.pdsUrl;
-	    }()), 
             /**
-             * Institution data
-             * @property institution
-             * @type Object
+             * @property {string} currentViewPDSUrl Current View PDS url
              */
-            institution:{
+            currentViewPDSUrl: (function () {
+                return sessionData.pdsUrl;
+            }()),
+            /**
+             * @namespace session.institution
+             * @property {object} session.institution Institution data
+             */
+            institution: {
                 /**
-                 * @property name
-                 * @type String
+                 * @member {string} session.institution.name
                  */
-                name:(function () {
+                name: (function () {
                     return sessionData.institutionName;
                 }()),
                 /**
-                 * @property nameByIP
-                 * @type String
+                 * @member {string} session.institution.nameByIP
                  */
-                nameByIP:(function () {
+                nameByIP: (function () {
                     return sessionData.institutionNameByIP;
                 }()),
                 /**
-                 * @property nameByVIEW
-                 * @type String
+                 * @member {string} session.institution.nameByVIEW
                  */
-                nameByVIEW:(function () {
+                nameByVIEW: (function () {
                     return sessionData.institutionNameByView;
                 }()),
                 /**
-                 * @property code
-                 * @type String
+                 * @member {string} session.institution.code
                  */
-                code:(function () {
+                code: (function () {
                     return sessionData.institutionCode;
                 }()),
                 /**
-                 * @property codeByIP
-                 * @type String
+                 * @member {string} session.institution.codeByIP
                  */
-                codeByIP:(function () {
+                codeByIP: (function () {
                     return sessionData.institutionCodeByIP;
                 }()),
                 /**
-                 * @property codeByVIEW
-                 * @type String
+                 * @member {string} session.institution.codeByVIEW
                  */
-                codeByVIEW:(function () {
+                codeByVIEW: (function () {
                     return sessionData.institutionCodeByView;
                 }())
             },
             /**
-             * SFX properties
-             * @property sfx
-             * @type Object
+             * @namespace session.sfx
+             * @property {object} session.sfx SFX properties
              */
-            sfx:{
+            sfx: {
                 /**
-                 * @property code
-                 * @type String
+                 * @member {string} session.sfx.code
                  */
-                code:(function () {
+                code: (function () {
                     return sessionData.sfxInstitutionCode
                 }())
             },
             /**
-             * METALIB properties
-             * @property metalib
-             * @type Object
+             * @namespace session.metalib
+             * @property {object} session.metalib METALIB properties
              */
-            metalib:{
+            metalib: {
                 /**
-                 * @property code
-                 * @type String
+                 * @member {string} session.metalib.code
                  */
-                code:(function () {
+                code: (function () {
                     return sessionData.metalibInstitutionCode
                 }())
             },
             /**
-             * USER data
-             * @property user
-             * @type Object
+             * @namespace session.user
+             * @property {object} session.user USER data
              */
-            user:{
+            user: {
                 /**
                  * Session id of the user
-                 * @property id
-                 * @type String
+                 * @member {string} session.user.id
                  */
-                id:(function () {
+                id: (function () {
                     return sessionData.userInfo.userId
                 }()),
                 /**
-                 * User name defaults to anonymous when not logged on.
-                 * @property name
-                 * @type String
+                 * @member {string} session.user.name
+                 * @desc User name defaults to anonymous when not logged on.
                  */
-                name:(function () {
+                name: (function () {
                     return sessionData.userInfo.userName
                 }()),
                 /**
-                 * @property group
-                 * @type Object
+                 * @namespace session.user.group
+                 * @property {object} session.user.group
                  */
-                group:{
+                group: {
                     /**
-                     * Borrower group id
-                     * @property id
-                     * @type String
+                     * @member id {string} session.user.group.id
+                     * @desc Borrower group id
                      */
-                    id:(function () {
+                    id: (function () {
                         return sessionData.userInfo.borGroupId
                     }()),
                     /**
-                     * Borrower group name
-                     * @property name
-                     * @type String
+                     * @member {string} session.user.group.name
+                     * @desc Borrower group name
                      */
-                    name:(function () {
+                    name: (function () {
                         return sessionData.userInfo.borGroup
                     }())
                 }
             }
         },
-        records:(function () {
+        /**
+         * List of records
+         * @property records
+         * @type Array
+         */
+        records: (function () {
             var records_count = jQuery('.EXLResult').length;
             var data = [];
 
@@ -499,44 +527,44 @@
          * Test if the FrontEnd is running on TEST environment
          *
          * @method isTestFrontEnd
-         * @return Boolean
+         * @returns Boolean
          */
-        isTestFrontEnd:function () {
+        isTestFrontEnd: function () {
             return sessionData.frontEndId === 'TEST';
         },
         /**
          * Is the user on campus
          *
          * @method isOnCampus
-         * @return Boolean
+         * @returns Boolean
          */
-        isOnCampus:function () {
+        isOnCampus: function () {
             return sessionData.onCampus;
         },
         /**
          * Is the user loggon on
          *
          * @method isLoggedOn
-         * @return Boolean
+         * @returns Boolean
          */
-        isLoggedOn:function () {
+        isLoggedOn: function () {
             return sessionData.loggedOn;
         },
         /**
          * Are we looking at the record in FULL Display
          * @method isFullDisplay
-         * @return Boolean
+         * @returns Boolean
          */
-        isFullDisplay:function () {
+        isFullDisplay: function () {
             return jQuery('.EXLFullView').size() > 0;
         },
         /**
          * Get a record by supplying an object like a location tab
          * @method getRecordByObject
-         * @param [Object] the object you want to get the record for can be a jQuery or DOM object
-         * @return [Object] null when not found or record
+         * @param {Object} referenceObject the object you want to get the record for can be a jQuery or DOM object
+         * @returns [Object] null when not found or record
          */
-        getRecordByObject:function (referenceObject) {
+        getRecordByObject: function (referenceObject) {
             var primoObject = null;
             if (referenceObject instanceof jQuery) {
                 primoObject = referenceObject;
